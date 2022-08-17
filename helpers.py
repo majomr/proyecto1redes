@@ -62,11 +62,11 @@ def secondary_menu():
 
 1. Contactos
 2. Agregar un usuario a tus contactos
-3. Detalles de un usuario (no sirve) 
+3. Detalles de un usuario 
 4. Chats Personales
-5. Chats Grupales (no sirve) 
+5. Chats Grupales
 6. Mensaje de Presencia
-7. Enviar archivo (no sirve)
+7. Enviar archivo 
 8. Cerrar Sesion
 00. Eliminar cuenta
 

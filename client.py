@@ -209,3 +209,92 @@ class DeleteAccount(slixmpp.ClientXMPP):
             print(e)  
 
         self.disconnect()
+        
+class MUC(slixmpp.ClientXMPP):
+    '''Group Chats'''
+
+    def __init__(self, jid, password, rjid, alias):
+        slixmpp.ClientXMPP.__init__(self, jid, password)
+
+        self.jid = jid
+        self.rjid = rjid
+        self.alias = alias
+
+        #event handlers
+        self.add_event_handler("session_start", self.start)
+        self.add_event_handler("groupchat_message", self.muc_message)
+        self.add_event_handler("muc::%s::got_online" % self.rjid,
+                               self.muc_online)
+
+        self.register_plugin('xep_0030')
+        self.register_plugin('xep_0045')
+        self.register_plugin('xep_0199')
+
+    async def start(self, event):
+        #Send events
+        await self.get_roster()
+        self.send_presence()
+        self.plugin['xep_0045'].join_muc(self.rjid,self.alias)
+
+        #Message to write
+        message = input("Write the message: ")
+        self.send_message(mto=self.rjid,
+                          mbody=message,
+                          mtype='groupchat')
+
+    #Handle muc message
+    def muc_message(self, msg):
+        if(str(msg['from']).split('/')[1]!=self.alias):
+            print(str(msg['from']).split('/')[1] + ": " + msg['body'])
+            message = input("Write the message: ")
+            self.send_message(mto=msg['from'].bare,
+                              mbody=message,
+                              mtype='groupchat')
+
+    #Send message to group
+    def muc_online(self, presence):
+        if presence['muc']['nick'] != self.alias:
+            self.send_message(mto=presence['from'].bare,
+                              mbody="Hello, %s %s" % (presence['muc']['role'],
+                                                      presence['muc']['alias']),
+                              mtype='groupchat')
+            
+class SendFile(slixmpp.ClientXMPP):
+    '''Send a file'''
+
+    #https://git.poez.io/slixmpp/tree/examples/s5b_transfer/s5b_sender.py
+
+    def __init__(self, jid, password, receiver, filename):
+        slixmpp.ClientXMPP.__init__(self, jid, password)
+
+        self.receiver = receiver
+
+        self.file = open(filename, 'rb')
+
+        self.add_event_handler("session_start", self.start)
+
+        self.register_plugin('xep_0030') # Service Discovery
+        self.register_plugin('xep_0065') # SOCKS5 Bytestreams
+
+
+    async def start(self, event):
+        try:
+            # Open the S5B stream in which to write to.
+            proxy = await self['xep_0065'].handshake(self.receiver)
+
+            # Send the entire file.
+            while True:
+                data = self.file.read(1048576)
+                if not data:
+                    break
+                await proxy.write(data)
+
+            # And finally close the stream.
+            proxy.transport.write_eof()
+        except (IqError, IqTimeout):
+            print('File transfer errored')
+        else:
+            print('File transfer finished')
+        finally:
+            self.file.close()
+            self.disconnect()

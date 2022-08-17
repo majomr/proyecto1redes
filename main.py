@@ -1,7 +1,7 @@
 # Proyecto 1
 # Maria Jose Morales 19145
 
-from client import DeleteAccount, ListClients, SendMsg, SubscribeClient
+from client import DeleteAccount, ListClients, MUC, SendFile, SendMsg, SubscribeClient
 from registration import Register
 from helpers import clr_scr, enter_to_continue, get_password, main_menu, login_menu, secondary_menu
 
@@ -106,8 +106,20 @@ if __name__ == '__main__':
                     enter_to_continue()
                 
                 elif secondary_menu_op == '3':
-                    #FALTA ESTA OPCION
-                    print("\n\t\tNo srive todavia :(\n")
+                    '''Show Specific user info'''
+
+                    clr_scr()
+
+                    print("\n\t\tMostrar detalles de un usuario\n")
+
+                    see_contact = input("Ingresa nombre de contacto: ")
+
+                    xmpp = ListClients(jid, password, see_contact)
+            
+                    xmpp.connect()
+                    xmpp.process(forever=False)
+
+                    enter_to_continue()
                     
                 elif secondary_menu_op == '4':
                     '''Chats Personales'''
@@ -126,8 +138,20 @@ if __name__ == '__main__':
                     xmpp.process(forever=False)
 
                 elif secondary_menu_op == '5':
-                    #FALTA ESTA OPCION
-                    print("\n\t\tNo srive todavia :(\n")
+                    '''Group Chats'''
+
+                    clr_scr()
+
+                    print("\n\t\tChats Grupales\n")
+
+                    rjid = input("Ingresa Room JID: ")
+
+                    alias = input("Ingresa tu alias: ")
+
+                    xmpp = MUC(jid, password, rjid, alias)
+
+                    xmpp.connect()
+                    xmpp.process(forever=False)
 
                 elif secondary_menu_op == '6':
                     '''Definir un mensaje de presencia'''
@@ -144,8 +168,22 @@ if __name__ == '__main__':
                     xmpp.process(forever=False)
                 
                 elif secondary_menu_op == '7':
-                    #FALTA ESTA OPCION
-                    print("\n\t\tNo srive todavia :(\n")
+                    '''Send a file'''
+
+                    clr_scr()
+
+                    print("\n\t\tEnviar un archivo\n")
+
+                    text_contact = input("Ingresa nombre de contacto: ")
+                    path = input("Ingresa path del archivo: ")
+
+                    xmpp = SendFile(jid, password, text_contact, path)
+
+                    # Connect to the XMPP server and start processing XMPP stanzas.
+                    xmpp.connect()
+                    xmpp.process(forever=False)
+
+                    enter_to_continue()
 
                 elif secondary_menu_op == '8':
                     '''Close session'''
@@ -166,7 +204,7 @@ if __name__ == '__main__':
                     password = None
                 
                 else:
-                    print("\nERROR: Opcion ingresada no es valida.")
+                    print("\nOpcion ingresada no es valida.")
                     enter_to_continue()
 
         elif main_menu_op == '3':
@@ -174,5 +212,5 @@ if __name__ == '__main__':
             wantsToContinue = False
 
         else:
-            print("\nERROR: Opcion ingresada no es valida.")
+            print("\nOpcion ingresada no es valida.")
             enter_to_continue()
